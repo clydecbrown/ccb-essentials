@@ -1,16 +1,21 @@
+# https://packaging.python.org/en/latest/tutorials/packaging-projects/
+# https://python-poetry.org/docs/pyproject/
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "ccb-essentials"
 version = "0.1.0"
-description = ""
-authors = ["Clyde Brown <clyde.c.brown@gmail.com>"]
+description = "Essential tools for Python 3."
+authors = [
+    "Clyde C Brown <clyde.c.brown@gmail.com>",
+]
 readme = "README.md"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
 pytest = "^7.4.3"
 pylint = "^3.0.3"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
