@@ -21,3 +21,7 @@ First, [install Poetry](https://python-poetry.org/docs/).
 
 ### Build artifacts
     poetry build
+
+### Publish
+    poetry version [patch|minor|major]
+    poetry publish --build
