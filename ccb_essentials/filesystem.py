@@ -52,12 +52,11 @@ def assert_real_dir(path: Union[str, Path], mkdir: bool = False) -> Path:
     return new_path
 
 
-# todo NamedTemporaryFile
-#   or Path(mktemp(dir=dest.parent, prefix=dest.name))
 @contextmanager
 def temporary_path(name: str = "temp", touch: bool = False) -> Generator[Path, None, None]:
-    """Create a path to a temporary file. This differs from tempfile.TemporaryFile()
-    which creates a file-like object with no name."""
+    """Create a Path to a temporary file with a known name. This differs from
+    tempfile.TemporaryFile() which creates a file-like object and
+    tempfile.NamedTemporaryFile() which produces a random file name."""
     if name == "":
         raise ValueError("can't create a temporary_path with no name")
     with TemporaryDirectory() as td:
