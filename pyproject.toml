@@ -10,12 +10,17 @@ name = "ccb-essentials"
 version = "0.1.0"
 description = "Essential tools for Python 3."
 authors = [
-    "Clyde C Brown <clyde.c.brown@gmail.com>",
+    "Clyde C Brown <clyde.c.brown@pm.me>",
 ]
 readme = "README.md"
 license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pytest = "^7.4.3"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.7.1"
+pycodestyle = "^2.11.1"
 pylint = "^3.0.3"
+pytest = "^7.4.3"
+setuptools = "^69.0.2"

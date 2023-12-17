@@ -2,14 +2,14 @@
 import logging
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from ccb_essentials.constant import UTF8
 
 log = logging.getLogger(__name__)
 
 
-def subprocess_command(
+def subprocess_command(  # type: ignore[no-untyped-def]
         cmd: str,
         report_process_error: bool = True,
         report_std_error: bool = True,
@@ -29,7 +29,7 @@ def subprocess_command(
             err = res.stderr.decode(UTF8)
             if err:
                 log.warning(err)
-        decoded = res.stdout.decode(UTF8)
+        decoded: str = res.stdout.decode(UTF8)
         if strip_output:
             return decoded.strip()
         return decoded
@@ -40,6 +40,6 @@ def subprocess_command(
         return None
 
 
-def shell_escape(path: Path or str) -> str:
+def shell_escape(path: Union[str, Path]) -> str:
     """Escape a path for use the shell via subprocess_command(cmd)."""
     return '"' + str(path).replace('"', '\\"').replace('$', '\\$').replace('`', '\\`') + '"'

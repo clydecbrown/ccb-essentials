@@ -4,7 +4,7 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Optional, Union, Generator, Iterable
+from typing import Optional, Union, Generator, Iterable, List, Tuple
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def assert_real_path(path: Union[str, Path], mkdir: bool = False) -> Path:
     """Clean `path` and assert that it exists."""
     new_path = real_path(path, check_exists=True, mkdir=mkdir)
     if new_path is None:
-        raise FileNotFoundError("path %s does not exist" % path)
+        raise FileNotFoundError(f'path {path} does not exist')
     return new_path
 
 
@@ -40,7 +40,7 @@ def assert_real_file(path: Union[str, Path]) -> Path:
     """Clean `path` and assert that it is a file."""
     new_path = assert_real_path(path)
     if not new_path.is_file():
-        raise OSError("path %s is not a file" % path)
+        raise OSError(f'path {path} is not a file')
     return new_path
 
 
@@ -48,7 +48,7 @@ def assert_real_dir(path: Union[str, Path], mkdir: bool = False) -> Path:
     """Clean `path` and assert that it is a directory."""
     new_path = assert_real_path(path, mkdir)
     if not new_path.is_dir():
-        raise NotADirectoryError("path %s is not a directory" % path)
+        raise NotADirectoryError(f'path {path} is not a directory')
     return new_path
 
 
@@ -67,10 +67,10 @@ def temporary_path(name: str = "temp", touch: bool = False) -> Generator[Path, N
         yield path
 
 
-_space = '    '
-_branch = '│   '
-_tee = '├── '
-_last = '└── '
+_SPACE = '    '
+_BRANCH = '│   '
+_TEE = '├── '
+_LAST = '└── '
 
 
 def tree(root: Union[str, Path], prefix: str = '') -> Generator[str, None, None]:
@@ -87,10 +87,10 @@ def tree(root: Union[str, Path], prefix: str = '') -> Generator[str, None, None]
         contents = sorted(root.iterdir())
         lc1 = len(contents) - 1
         for i, path in enumerate(contents):
-            pointer = _tee if i < lc1 else _last
+            pointer = _TEE if i < lc1 else _LAST
             yield prefix + pointer + path.name
             if path.is_dir():
-                extension = _branch if i < lc1 else _space
+                extension = _BRANCH if i < lc1 else _SPACE
                 yield from tree(path, prefix=prefix+extension)
 
 
@@ -121,7 +121,7 @@ def common_ancestor(paths: Iterable[Path]) -> Optional[Path]:
             path = path.parent
         if common is None:
             common = path
-        elif common != path:
+        elif common != path:  # type: ignore[unreachable]
             common = common_root(common, path)
             if common is None:
                 return None
@@ -134,13 +134,14 @@ def common_parent(paths: Iterable[Path]) -> Optional[Path]:
     for path in paths:
         if common is None:
             common = path.parent
-        elif common != path.parent:
+        elif common != path.parent:  # type: ignore[unreachable]
             return None
     return common
 
 
 if __name__ == '__main__':
-    for test in [
+    # todo unit tests
+    for test1 in [
         ('/', '/', '/'),
         ('/', '/bin/echo', '/'),
         ('/bin/echo', '/', '/'),
@@ -152,33 +153,35 @@ if __name__ == '__main__':
         ('/usr/local/bin', '/usr/bin', '/usr'),
         ('/usr/bin', '/usr/local/bin', '/usr'),
     ]:
-        assert common_root(assert_real_path(test[0]), assert_real_path(test[1])) == assert_real_path(test[2])
-        assert common_ancestor((assert_real_path(test[0]), assert_real_path(test[1]))) == assert_real_path(test[2])
+        assert common_root(assert_real_path(test1[0]), assert_real_path(test1[1])) == assert_real_path(test1[2])
+        assert common_ancestor((assert_real_path(test1[0]), assert_real_path(test1[1]))) == assert_real_path(test1[2])
 
-    for test in [
-        [None],
-        [Path('/'), '/'],
-        [Path('/'), '/', '/'],
-        [Path('/bin'), '/bin'],
-        [Path('/bin'), '/bin', '/bin'],
-        [Path('/bin'), '/bin/echo', '/bin/kill', '/bin/ls', '/bin/mv'],
-        [Path('/usr'), '/usr/lib/dyld', '/usr/local/etc/fonts', '/usr/local/bin/bbedit'],
-        [Path('/'), '/bin/echo', '/bin/kill', '/usr/local/bin/bbedit'],
-        [Path('/'), '/bin/echo', '/usr/local/bin/bbedit', '/bin/kill'],
-        [Path('/'), '/usr/local/bin/bbedit', '/bin/echo', '/bin/kill'],
+    test2: Tuple[Optional[Path], List[str]]
+    for test2 in [  # type: ignore[assignment]
+        (None, list([])),
+        (Path('/'), list(['/'])),
+        (Path('/'), list(['/', '/'])),
+        (Path('/bin'), list(['/bin'])),
+        (Path('/bin'), list(['/bin', '/bin'])),
+        (Path('/bin'), list(['/bin/echo', '/bin/kill', '/bin/ls', '/bin/mv'])),
+        (Path('/usr'), list(['/usr/lib/dyld', '/usr/local/etc/fonts', '/usr/local/bin/bbedit'])),
+        (Path('/'), list(['/bin/echo', '/bin/kill', '/usr/local/bin/bbedit'])),
+        (Path('/'), list(['/bin/echo', '/usr/local/bin/bbedit', '/bin/kill'])),
+        (Path('/'), list(['/usr/local/bin/bbedit', '/bin/echo', '/bin/kill'])),
     ]:
-        assert common_ancestor(map(lambda p: assert_real_path(p), test[1:])) == test[0]
+        assert common_ancestor(map(assert_real_path, test2[1])) == test2[0]
 
-    for test in [
-        [None],
-        [Path('/'), '/'],
-        [Path('/'), '/', '/'],
-        [Path('/'), '/bin'],
-        [Path('/'), '/bin', '/bin'],
-        [Path('/bin'), '/bin/echo', '/bin/kill', '/bin/ls', '/bin/mv'],
-        [None, '/usr/lib/dyld', '/usr/local/etc/fonts', '/usr/local/bin/bbedit'],
-        [None, '/bin/echo', '/bin/kill', '/usr/local/bin/bbedit'],
-        [None, '/bin/echo', '/usr/local/bin/bbedit', '/bin/kill'],
-        [None, '/usr/local/bin/bbedit', '/bin/echo', '/bin/kill'],
+    test3: Tuple[Optional[Path], List[str]]
+    for test3 in [  # type: ignore[assignment]
+        (None, list([])),
+        (Path('/'), list(['/'])),
+        (Path('/'), list(['/', '/'])),
+        (Path('/'), list(['/bin'])),
+        (Path('/'), list(['/bin', '/bin'])),
+        (Path('/bin'), list(['/bin/echo', '/bin/kill', '/bin/ls', '/bin/mv'])),
+        (None, list(['/usr/lib/dyld', '/usr/local/etc/fonts', '/usr/local/bin/bbedit'])),
+        (None, list(['/bin/echo', '/bin/kill', '/usr/local/bin/bbedit'])),
+        (None, list(['/bin/echo', '/usr/local/bin/bbedit', '/bin/kill'])),
+        (None, list(['/usr/local/bin/bbedit', '/bin/echo', '/bin/kill'])),
     ]:
-        assert common_parent(map(lambda p: assert_real_path(p), test[1:])) == test[0]
+        assert common_parent(map(assert_real_path, test3[1])) == test3[0]

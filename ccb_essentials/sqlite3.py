@@ -26,7 +26,7 @@ class Sqlite3:
         self,
         db_con: Union[bytes, Path, Text, sqlite3.Connection],  # Either a path to a file or an open Connection.
         migrations: Optional[List[Migration]] = None,  # Used by application which defines its own schema.
-        db_versions: Optional[Sequence] = None,  # Application can read these versions, without defining migrations.
+        db_versions: Optional[Sequence[int]] = None,  # Application reads these versions, without defining migrations.
         application_id: Optional[int] = None,  # Unique ID for each application; the database file must match it.
         log_file: Optional[Path] = None,  # Output for trace logging.
         read_only: bool = False,  # Open a read-only connection, regardless of write locks held by other connections.
@@ -43,6 +43,8 @@ class Sqlite3:
             if isinstance(database, Path):
                 database = str(database)
             if read_only:
+                if isinstance(database, bytes):
+                    database = database.decode(UTF8)
                 self.con = sqlite3.connect(f'file:{database}?immutable=1', uri=True)
             else:
                 self.con = sqlite3.connect(database)
@@ -108,6 +110,8 @@ class Sqlite3:
     def is_locked(self) -> bool:
         """Look for the external markers of a database lock, without attempting to write to the connection."""
         db_name = self.db_name
+        if db_name is None:
+            return False
         return Path(db_name + '.lock').exists() or Path(db_name + '-journal').exists()
 
     @property
@@ -186,7 +190,7 @@ class Sqlite3:
 
         lf = log_file.open('a')
         self._log_file_handle = lf
-        log.debug('writing SQL traces to %s' % log_file)
+        log.debug('writing SQL traces to %s', log_file)
 
         def trace(statement: str) -> None:
             lf.write(f'{datetime.now()} {statement}{linesep}')
@@ -224,55 +228,65 @@ class DatabaseVersionError(RuntimeError):
 
 @dataclass(frozen=False)
 class SqlObjectMutable:
-    """Data class representing a row of data in a SQL database.
-    https://docs.python.org/3/library/sqlite3.html#converting-sqlite-values-to-custom-python-types
+    """Data class representing a row of data in a SQL database, with minimal support for building queries.
+    https://docs.python.org/3/library/sqlite3.html#sqlite3-converters
     """
 
     @property
-    def values(self) -> List[Any]:
+    def values(self) -> List[Any]:  # type: ignore[misc]
+        """Used in sqlite3.execute() to bind the instance's values to a SQL query."""
         return list(self.__dict__.values())
 
     @classmethod
     def fields_list(cls) -> List[str]:
+        """Helper method."""
         return list(cls.__dict__['__annotations__'].keys())
 
     @classmethod
     def fields_bindings(cls) -> str:
+        """Used to construct a SQL query like "INSERT INTO <table> (<fields_str>) VALUES (<fields_bindings>)"."""
         return ", ".join(map(lambda _: '?', cls.fields_list()))
 
     @classmethod
     def fields_str(cls) -> str:
+        """Used to construct a SQL query like "INSERT INTO <table> (<fields_str>) VALUES (<fields_bindings>)"
+        or "SELECT <fields_str> FROM <table>"."""
         return ", ".join(cls.fields_list())
 
     @classmethod
     @abstractmethod
-    def from_mapping(cls, fields: Mapping[str, Any]):
-        pass
+    def from_mapping(cls, fields: Mapping[str, Any]):  # type: ignore[no-untyped-def,misc]
+        """Convert a sqlite3.Row to a concrete instance of this class."""
 
 
 @dataclass(frozen=True)
 class SqlObjectFrozen:
-    """Data class representing a row of data in a SQL database.
-    https://docs.python.org/3/library/sqlite3.html#converting-sqlite-values-to-custom-python-types
+    """Data class representing a row of data in a SQL database, with minimal support for building queries.
+    https://docs.python.org/3/library/sqlite3.html#sqlite3-converters
     """
 
     @property
-    def values(self) -> List[Any]:
+    def values(self) -> List[Any]:  # type: ignore[misc]
+        """Used in sqlite3.execute() to bind the instance's values to a SQL query."""
         return list(self.__dict__.values())
 
     @classmethod
     def fields_list(cls) -> List[str]:
+        """Helper method."""
         return list(cls.__dict__['__annotations__'].keys())
 
     @classmethod
     def fields_bindings(cls) -> str:
+        """Used to construct a SQL query like "INSERT INTO <table> (<fields_str>) VALUES (<fields_bindings>)"."""
         return ", ".join(map(lambda _: '?', cls.fields_list()))
 
     @classmethod
     def fields_str(cls) -> str:
+        """Used to construct a SQL query like "INSERT INTO <table> (<fields_str>) VALUES (<fields_bindings>)"
+        or "SELECT <fields_str> FROM <table>"."""
         return ", ".join(cls.fields_list())
 
     @classmethod
     @abstractmethod
-    def from_mapping(cls, fields: Mapping[str, Any]):
-        pass
+    def from_mapping(cls, fields: Mapping[str, Any]):  # type: ignore[no-untyped-def,misc]
+        """Convert a sqlite3.Row to a concrete instance of this class."""

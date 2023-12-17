@@ -17,7 +17,7 @@ class TestSubprocessCommand:
         assert isinstance(results_str, str)
         results = results_str.split()
         for file in expected:
-            assert results.__contains__(file)
+            assert file in results
 
     @staticmethod
     def test_fail() -> None:
@@ -25,7 +25,7 @@ class TestSubprocessCommand:
         assert subprocess_command("not a command") is None
 
     @staticmethod
-    def test_report_error(caplog: LogCaptureFixture) -> None:  # type: ignore[misc,no-any-unimported]
+    def test_report_error(caplog: LogCaptureFixture) -> None:
         """It print stderr from a failed command."""
         assert subprocess_command("not a command") is None
         assert "not found" in caplog.text or "non-zero exit status" in caplog.text
@@ -35,12 +35,12 @@ class TestSubprocessCommand:
         """It should strip whitespace from results."""
         raw = subprocess_command("uptime", strip_output=False)
         assert isinstance(raw, str)
-        assert raw.__contains__("load average")
+        assert "load average" in raw
         assert raw.endswith(os.linesep)
 
         stripped = subprocess_command("uptime", strip_output=True)
         assert isinstance(stripped, str)
-        assert stripped.__contains__("load average")
+        assert "load average" in stripped
         assert not stripped.endswith(os.linesep)
 
     @staticmethod
