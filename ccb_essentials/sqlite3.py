@@ -22,6 +22,7 @@ class Sqlite3:
     """Connection to a sqlite3 database."""
     con: sqlite3.Connection
 
+    # pylint: disable-next=too-many-positional-arguments
     def __init__(
         self,
         db_con: Union[bytes, Path, Text, sqlite3.Connection],  # Either a path to a file or an open Connection.
@@ -233,7 +234,7 @@ class SqlObjectMutable:
     """
 
     @property
-    def values(self) -> List[Any]:  # type: ignore[misc]
+    def values(self) -> List[Any]:
         """Used in sqlite3.execute() to bind the instance's values to a SQL query."""
         return list(self.__dict__.values())
 
@@ -255,7 +256,7 @@ class SqlObjectMutable:
 
     @classmethod
     @abstractmethod
-    def from_mapping(cls, fields: Mapping[str, Any]):  # type: ignore[no-untyped-def,misc]
+    def from_mapping(cls, fields: Mapping[str, Any]):  # type: ignore[no-untyped-def]
         """Convert a sqlite3.Row to a concrete instance of this class."""
 
 
@@ -266,7 +267,7 @@ class SqlObjectFrozen:
     """
 
     @property
-    def values(self) -> List[Any]:  # type: ignore[misc]
+    def values(self) -> List[Any]:
         """Used in sqlite3.execute() to bind the instance's values to a SQL query."""
         return list(self.__dict__.values())
 
@@ -288,5 +289,5 @@ class SqlObjectFrozen:
 
     @classmethod
     @abstractmethod
-    def from_mapping(cls, fields: Mapping[str, Any]):  # type: ignore[no-untyped-def,misc]
+    def from_mapping(cls, fields: Mapping[str, Any]):  # type: ignore[no-untyped-def]
         """Convert a sqlite3.Row to a concrete instance of this class."""

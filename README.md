@@ -24,5 +24,5 @@ First, [install Poetry](https://python-poetry.org/docs/).
 
 ### Publish
     poetry version [major|minor|patch]
-    V=v`poetry version -s` && git commit -m $V && git tag -a -m $V $V
+    V=v`poetry version -s` && git add pyproject.toml && git commit -m $V && git tag -a -m $V $V
     poetry publish --build

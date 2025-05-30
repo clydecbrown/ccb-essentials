@@ -27,11 +27,11 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.7.1"
-pycodestyle = "^2.11.1"
-pylint = "^3.0.3"
-pytest = "^7.4.3"
-setuptools = "^69.0.2"
+mypy = "^1.16.0"
+pycodestyle = "^2.13.0"
+pylint = "^3.3.7"
+pytest = "^7.4.4"
+setuptools = "^69.5.1"

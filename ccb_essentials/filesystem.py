@@ -120,7 +120,7 @@ def common_ancestor(paths: Iterable[Path]) -> Optional[Path]:
             path = path.parent
         if common is None:
             common = path
-        elif common != path:  # type: ignore[unreachable]
+        elif common != path:
             common = common_root(common, path)
             if common is None:
                 return None
@@ -133,7 +133,7 @@ def common_parent(paths: Iterable[Path]) -> Optional[Path]:
     for path in paths:
         if common is None:
             common = path.parent
-        elif common != path.parent:  # type: ignore[unreachable]
+        elif common != path.parent:
             return None
     return common
 
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         assert common_ancestor((assert_real_path(test1[0]), assert_real_path(test1[1]))) == assert_real_path(test1[2])
 
     test2: Tuple[Optional[Path], List[str]]
-    for test2 in [  # type: ignore[assignment]
+    for test2 in [
         (None, list([])),
         (Path('/'), list(['/'])),
         (Path('/'), list(['/', '/'])),
@@ -171,7 +171,7 @@ if __name__ == '__main__':
         assert common_ancestor(map(assert_real_path, test2[1])) == test2[0]
 
     test3: Tuple[Optional[Path], List[str]]
-    for test3 in [  # type: ignore[assignment]
+    for test3 in [
         (None, list([])),
         (Path('/'), list(['/'])),
         (Path('/'), list(['/', '/'])),
