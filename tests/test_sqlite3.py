@@ -67,7 +67,7 @@ class TestSqlite3:
 
     @staticmethod
     def test_migration_failed() -> None:
-        """It should should not advance the schema version if a migration fails."""
+        """It should not advance the schema version if a migration fails."""
         with temporary_path() as path:
             with pytest.raises(DatabaseMigrationError):
                 db = Sqlite3(path, [_bad_migration])

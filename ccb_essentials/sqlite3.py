@@ -26,7 +26,7 @@ class Sqlite3:
     def __init__(
         self,
         db_con: Union[bytes, Path, Text, sqlite3.Connection],  # Either a path to a file or an open Connection.
-        migrations: Optional[List[Migration]] = None,  # Used by application which defines its own schema.
+        migrations: Optional[List[Migration]] = None,  # Used by an application which defines its own schema.
         db_versions: Optional[Sequence[int]] = None,  # Application reads these versions, without defining migrations.
         application_id: Optional[int] = None,  # Unique ID for each application; the database file must match it.
         log_file: Optional[Path] = None,  # Output for trace logging.

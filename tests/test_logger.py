@@ -4,6 +4,9 @@ import os
 import sys
 from tempfile import NamedTemporaryFile
 
+from _pytest.capture import CaptureFixture
+from _pytest.logging import LogCaptureFixture
+
 from ccb_essentials.filesystem import real_path
 from ccb_essentials.logger import StreamToLogger
 
@@ -16,7 +19,7 @@ class TestStreamToLogger:
     """Unit tests for StreamToLogger"""
 
     @staticmethod
-    def test_redirect(capsys, caplog) -> None:  # type: ignore[no-untyped-def]
+    def test_redirect(capsys: CaptureFixture[str], caplog: LogCaptureFixture) -> None:
         """It should redirect printed output to the logger."""
         caplog.set_level(logging.DEBUG)  # capture all levels
         with NamedTemporaryFile() as f:
@@ -50,7 +53,7 @@ class TestStreamToLogger:
             assert "not printed" not in captured.err
 
     @staticmethod
-    def test_print(capsys, caplog) -> None:  # type: ignore[no-untyped-def]
+    def test_print(capsys: CaptureFixture[str], caplog: LogCaptureFixture) -> None:
         """Sanity check: it should not redirect printed output if not asked."""
         caplog.set_level(logging.DEBUG)  # capture all levels
         with NamedTemporaryFile() as f:

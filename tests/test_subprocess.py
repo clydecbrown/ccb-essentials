@@ -26,7 +26,7 @@ class TestSubprocessCommand:
 
     @staticmethod
     def test_report_error(caplog: LogCaptureFixture) -> None:
-        """It print stderr from a failed command."""
+        """It should print stderr from a failed command."""
         assert subprocess_command("not a command") is None
         assert "not found" in caplog.text or "non-zero exit status" in caplog.text
 

@@ -15,7 +15,7 @@ authors = [
 readme = "README.md"
 license = "MIT"
 repository = "https://github.com/clydecbrown/ccb-essentials"
-keywords = ["utilities", "file", "path", "subprocess", "argparse", "sqlite3"]
+keywords = ["utilities", "file", "path", "subprocess", "argparse", "sqlite3", "logging"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
