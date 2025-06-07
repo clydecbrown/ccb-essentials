@@ -47,7 +47,7 @@ class StreamToLogger(TextIO):
 
     def fileno(self) -> int:
         """Not implemented."""
-        return -1
+        return 0
 
     def isatty(self) -> bool:
         """Not implemented."""
